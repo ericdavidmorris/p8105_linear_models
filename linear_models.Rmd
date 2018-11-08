@@ -1,0 +1,60 @@
+---
+title: "Linear Models"
+author: "Eric Morris"
+date: "11/8/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(p8105.datasets)
+
+set.seed(1)
+
+```
+
+## Model Fitting 
+
+Looking at airbnb data
+
+```{r}
+data("nyc_airbnb")
+
+nyc_airbnb = 
+  nyc_airbnb %>% 
+  mutate(stars = review_scores_location / 2) %>% 
+  rename(boro = neighbourhood_group,
+         neighborhood = neighbourhood) %>% 
+  filter(boro != "Staten Island") %>% 
+  select(price, stars, boro, neighborhood, room_type)
+```
+
+Fit a model for price as an outcome
+
+```{r}
+fit = lm(price ~ stars + boro, data = nyc_airbnb)
+```
+
+Look at some summaries (this is long and ugly and why we will be using the broom package: 
+
+```{r}
+summary(fit)
+summary(fit)$coef
+coef(fit)
+fitted.values(fit)
+```
+
+Better summaries using broom
+
+```{r}
+broom::tidy(fit)
+
+fit %>% 
+  broom::tidy() %>% 
+  select(term, estimate, p.value) %>% 
+  mutate(term = str_replace(term, "^boro", "Boro: ")) %>% 
+  knitr::kable(digits = 3)
+```
+
